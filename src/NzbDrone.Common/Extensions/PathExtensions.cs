@@ -15,7 +15,7 @@ namespace NzbDrone.Common.Extensions
         private const string DB_RESTORE = "sonarr.restore";
         private const string LOG_DB = "logs.db";
         private const string NLOG_CONFIG_FILE = "nlog.config";
-        private const string UPDATE_CLIENT_EXE = "Sonarr.Update.exe";
+        private const string UPDATE_CLIENT_EXE_NAME = "Sonarr.Update";
 
         private static readonly string UPDATE_SANDBOX_FOLDER_NAME = "sonarr_update" + Path.DirectorySeparatorChar;
         private static readonly string UPDATE_PACKAGE_FOLDER_NAME = "Sonarr" + Path.DirectorySeparatorChar;
@@ -33,7 +33,8 @@ namespace NzbDrone.Common.Extensions
 
             var info = new FileInfo(path.Trim());
 
-            if (OsInfo.IsWindows && info.FullName.StartsWith(@"\\")) //UNC
+            //UNC
+            if (OsInfo.IsWindows && info.FullName.StartsWith(@"\\"))
             {
                 return info.FullName.TrimEnd('/', '\\', ' ');
             }
@@ -53,7 +54,11 @@ namespace NzbDrone.Common.Extensions
                 comparison = DiskProviderBase.PathStringComparison;
             }
 
-            if (firstPath.Equals(secondPath, comparison.Value)) return true;
+            if (firstPath.Equals(secondPath, comparison.Value))
+            {
+                return true;
+            }
+
             return string.Equals(firstPath.CleanFilePath(), secondPath.CleanFilePath(), comparison.Value);
         }
 
@@ -232,6 +237,21 @@ namespace NzbDrone.Common.Extensions
             return null;
         }
 
+        public static string ProcessNameToExe(this string processName, PlatformType runtime)
+        {
+            if (OsInfo.IsWindows || runtime != PlatformType.NetCore)
+            {
+                processName += ".exe";
+            }
+
+            return processName;
+        }
+
+        public static string ProcessNameToExe(this string processName)
+        {
+            return processName.ProcessNameToExe(PlatformInfo.Platform);
+        }
+
         public static string GetAppDataPath(this IAppFolderInfo appFolderInfo)
         {
             return appFolderInfo.AppDataFolder;
@@ -292,9 +312,9 @@ namespace NzbDrone.Common.Extensions
             return Path.Combine(GetUpdatePackageFolder(appFolderInfo), UPDATE_CLIENT_FOLDER_NAME);
         }
 
-        public static string GetUpdateClientExePath(this IAppFolderInfo appFolderInfo)
+        public static string GetUpdateClientExePath(this IAppFolderInfo appFolderInfo, PlatformType runtime)
         {
-            return Path.Combine(GetUpdateSandboxFolder(appFolderInfo), UPDATE_CLIENT_EXE);
+            return Path.Combine(GetUpdateSandboxFolder(appFolderInfo), UPDATE_CLIENT_EXE_NAME).ProcessNameToExe(runtime);
         }
 
         public static string GetDatabase(this IAppFolderInfo appFolderInfo)
