@@ -1,9 +1,9 @@
-﻿using CookComputing.XmlRpc;
-using NLog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using CookComputing.XmlRpc;
+using NLog;
 
 namespace NzbDrone.Core.Download.Clients.Aria2
 {
@@ -45,7 +45,7 @@ namespace NzbDrone.Core.Download.Clients.Aria2
         Aria2Status[] GetWaitings(string token, int offset, int num);
 
         [XmlRpcMethod("aria2.tellStopped")]
-        Aria2Status[] GetStoppeds(string token, int offset, int num); 
+        Aria2Status[] GetStoppeds(string token, int offset, int num);
     }
 
     public class Aria2Proxy : IAria2Proxy
@@ -91,7 +91,6 @@ namespace NzbDrone.Core.Download.Clients.Aria2
             return found;
         }
 
-
         public Aria2Status[] GetTorrents(Aria2Settings settings)
         {
             _logger.Debug("> aria2.tellActive");
@@ -104,13 +103,13 @@ namespace NzbDrone.Core.Download.Clients.Aria2
 
             _logger.Debug("> aria2.tellWaiting");
 
-            var waitings = ExecuteRequest(() => client.GetWaitings(GetToken(settings), 1, 10*1024));
+            var waitings = ExecuteRequest(() => client.GetWaitings(GetToken(settings), 1, 10 * 1024));
 
             _logger.Debug("< aria2.tellWaiting");
 
             _logger.Debug("> aria2.tellStopped");
 
-            var stoppeds = ExecuteRequest(() => client.GetStoppeds(GetToken(settings), 1, 10*1024));
+            var stoppeds = ExecuteRequest(() => client.GetStoppeds(GetToken(settings), 1, 10 * 1024));
 
             _logger.Debug("< aria2.tellStopped");
 
@@ -119,7 +118,7 @@ namespace NzbDrone.Core.Download.Clients.Aria2
             ret.AddRange(actives);
             ret.AddRange(waitings);
             ret.AddRange(stoppeds);
-            
+
             return ret.ToArray();
         }
 
@@ -134,8 +133,8 @@ namespace NzbDrone.Core.Download.Clients.Aria2
 
             var ret = new Dictionary<string, string>();
 
-            foreach(DictionaryEntry option in options)
-            {                
+            foreach (DictionaryEntry option in options)
+            {
                 ret.Add(option.Key.ToString(), option.Value?.ToString());
             }
 

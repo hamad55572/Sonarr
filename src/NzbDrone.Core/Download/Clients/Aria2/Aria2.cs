@@ -1,4 +1,8 @@
-﻿using CookComputing.XmlRpc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using CookComputing.XmlRpc;
 using FluentValidation.Results;
 using NLog;
 using NzbDrone.Common.Disk;
@@ -9,10 +13,6 @@ using NzbDrone.Core.MediaFiles.TorrentInfo;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.RemotePathMappings;
 using NzbDrone.Core.Validation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 
 namespace NzbDrone.Core.Download.Clients.Aria2
 {
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Download.Clients.Aria2
                         Logger logger)
             : base(torrentFileInfoReader, httpClient, configService, diskProvider, remotePathMappingService, logger)
         {
-            _proxy = proxy; ;
+            _proxy = proxy;
         }
 
         protected override string AddFromMagnetLink(RemoteEpisode remoteEpisode, string hash, string magnetLink)
@@ -74,11 +74,12 @@ namespace NzbDrone.Core.Download.Clients.Aria2
         {
             var torrents = _proxy.GetTorrents(Settings);
 
-            foreach(var torrent in torrents)
+            foreach (var torrent in torrents)
             {
                 var firstFile = torrent.Files?.FirstOrDefault();
 
-                if (firstFile?.Path?.Contains("[METADATA]") == true) //skip metadata download
+                //skip metadata download
+                if (firstFile?.Path?.Contains("[METADATA]") == true)
                 {
                     continue;
                 }
@@ -91,7 +92,7 @@ namespace NzbDrone.Core.Download.Clients.Aria2
                 var sta = DownloadItemStatus.Failed;
                 var title = "";
 
-                if(torrent.Bittorrent?.ContainsKey("info") == true && ((XmlRpcStruct)torrent.Bittorrent["info"]).ContainsKey("name"))
+                if (torrent.Bittorrent?.ContainsKey("info") == true && ((XmlRpcStruct)torrent.Bittorrent["info"]).ContainsKey("name"))
                 {
                     title = ((XmlRpcStruct)torrent.Bittorrent["info"])["name"].ToString();
                 }
@@ -131,13 +132,13 @@ namespace NzbDrone.Core.Download.Clients.Aria2
                     Message = torrent.ErrorMessage,
                     OutputPath = _remotePathMappingService.RemapRemoteToLocal(Settings.Host, new OsPath(torrent.Dir)),
                     RemainingSize = totalLength - completedLength,
-                    RemainingTime = downloadSpeed == 0 ? (TimeSpan?)null : new TimeSpan(0,0, (int)((totalLength - completedLength) / downloadSpeed)),
+                    RemainingTime = downloadSpeed == 0 ? (TimeSpan?)null : new TimeSpan(0, 0, (int)((totalLength - completedLength) / downloadSpeed)),
                     Removed = torrent.Status == "removed",
                     SeedRatio = totalLength > 0 ? (double)uploadedLength / totalLength : 0,
                     Status = sta,
                     Title = title,
                     TotalSize = totalLength,
-                };              
+                };
             }
         }
 
@@ -147,7 +148,7 @@ namespace NzbDrone.Core.Download.Clients.Aria2
             var hash = item.DownloadId.ToLower();
             var aria2Item = _proxy.GetTorrents(Settings).FirstOrDefault(t => t.InfoHash?.ToLower() == hash);
 
-            if(aria2Item == null)
+            if (aria2Item == null)
             {
                 _logger.Error($"Aria2 could not find infoHash '{hash}' for deletion.");
                 return;
@@ -201,7 +202,10 @@ namespace NzbDrone.Core.Download.Clients.Aria2
         {
             failures.AddIfNotNull(TestConnection());
 
-            if (failures.HasErrors()) return;
+            if (failures.HasErrors())
+            {
+                return;
+            }
         }
 
         private ValidationFailure TestConnection()

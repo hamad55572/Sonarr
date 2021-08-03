@@ -128,7 +128,7 @@ namespace NzbDrone.Core.Tv
                     }
                 });
 
-                var matches = possibleMatches
+            var matches = possibleMatches
                                 .Where(e => e.Episode.Title.Length > 0 && e.Position >= 0)
                                 .OrderBy(e => e.Position)
                                 .ThenByDescending(e => e.Length)
@@ -237,9 +237,15 @@ namespace NzbDrone.Core.Tv
         {
             var episodes = _episodeRepository.Find(seriesId, date);
 
-            if (!episodes.Any()) return null;
+            if (!episodes.Any())
+            {
+                return null;
+            }
 
-            if (episodes.Count == 1) return episodes.First();
+            if (episodes.Count == 1)
+            {
+                return episodes.First();
+            }
 
             _logger.Debug("Multiple episodes with the same air date were found, will exclude specials");
 
